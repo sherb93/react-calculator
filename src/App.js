@@ -1,12 +1,39 @@
-import React from 'react';
+import React, {  useReducer } from 'react';
 import './styles.css';
 
+const ACTIONS = {
+  APPEND_DIGIT: "append-digit",
+  DELETE_DIGIT: "delete-digit",
+  CLEAR: "clear",
+  CHOOSE_OPERATION: "choose-operation",
+  // ADDITION: "addition",
+  // SUBTRACTION: "subtraction",
+  // MULTIPLY: "multiply",
+  // DIVIDE: "divide",
+  EVALUATE: "evalutate"
+}
+
+function reducer(state, { type, payload }) {
+  switch (type) {
+    case ACTIONS.APPEND_DIGIT:
+      return {
+        ...state,
+        currentOperand: `${currentOperand || ""}${payload.digit}`
+      };
+    default:
+      return state;
+  };
+}
+
 function App() {
+
+  const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(reducer, {})
+
   return (
     <div className="calc-grid">
       <div className="output">
-        <div className="previous-operand">41,434,422</div>
-        <div className="current-operand">144,566</div>
+        <div className="previous-operand">{previousOperand} {operation}</div>
+        <div className="current-operand">{currentOperand}</div>
       </div>
       <button className="span-two">AC</button>
       <button>DEL</button>
