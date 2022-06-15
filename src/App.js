@@ -1,26 +1,45 @@
 import React, {  useReducer } from 'react';
 import DigitButton from './components/DigitButton'
+import OperationButton from './components/OperationButton'
 import './styles.css';
 
+// Create variables for values to prevent spelling errors. Variables typos will be caught by VSCode
 export const ACTIONS = {
   APPEND_DIGIT: "append-digit",
   DELETE_DIGIT: "delete-digit",
   CLEAR: "clear",
   CHOOSE_OPERATION: "choose-operation",
-  // ADDITION: "addition",
-  // SUBTRACTION: "subtraction",
-  // MULTIPLY: "multiply",
-  // DIVIDE: "divide",
   EVALUATE: "evalutate"
 }
+
 
 function reducer(state, { type, payload }) {
   switch (type) {
     case ACTIONS.APPEND_DIGIT:
+      // Edge cases for 0's and .'s
+      if (payload.digit === "0" && state.currentOperand === "0") return state
+      if (payload.digit !== "0" && state.currentOperand === "0") return {...state, currentOperand: payload.digit}
+      if (payload.digit === "." && state.currentOperand.includes(".")) return state
       return {
         ...state,
         currentOperand: `${state.currentOperand || ""}${payload.digit}`
       }
+    case ACTIONS.CHOOSE_OPERATION:
+      if (state.currentOperand === null && state.previousOperand === null) return state
+    case ACTIONS.CLEAR:
+      return {};
+    // case ACTIONS.CHOOSE_OPERATION:
+    //   switch (payload) {
+    //     case "/":
+    //       return {
+    //         ...state,
+    //         currentOperand: 
+    //       }
+    //   }
+    //   return {
+    //     ...state,
+    //     currentOperand: `${state.currentOperand || ""}${payload.digit}`
+    //   }
     default:
       return state;
   }
@@ -28,6 +47,8 @@ function reducer(state, { type, payload }) {
 
 function App() {
 
+  // useReducer() replaces useState() to juggle multiple states at once
+  // Parameters: 1. reducer is my custom function scoped globally 2. default state values
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(reducer, {})
 
   return (
@@ -36,23 +57,23 @@ function App() {
         <div className="previous-operand">{previousOperand} {operation}</div>
         <div className="current-operand">{currentOperand}</div>
       </div>
-      <button className="span-two">AC</button>
+      <button className="span-two" onClick={() => dispatch({ type: ACTIONS.CLEAR })}>AC</button>
       <button>DEL</button>
-      <DigitButton digit="/" dispatch={dispatch} />
-      <button>1</button>
-      <button>2</button>
-      <button>3</button>
+      <OperationButton operation="/" dispatch={dispatch} />
+      <DigitButton digit="1" dispatch={dispatch} />
+      <DigitButton digit="2" dispatch={dispatch} />
+      <DigitButton digit="3" dispatch={dispatch} />
       <button>*</button>
-      <button>4</button>
-      <button>5</button>
-      <button>6</button>
+      <DigitButton digit="4" dispatch={dispatch} />
+      <DigitButton digit="5" dispatch={dispatch} />
+      <DigitButton digit="6" dispatch={dispatch} />
       <button>+</button>
-      <button>7</button>
-      <button>8</button>
-      <button>9</button>
+      <DigitButton digit="7" dispatch={dispatch} />
+      <DigitButton digit="8" dispatch={dispatch} />
+      <DigitButton digit="9" dispatch={dispatch} />
       <button>-</button>
-      <button>.</button>
-      <button>0</button>
+      <DigitButton digit="." dispatch={dispatch} />
+      <DigitButton digit="0" dispatch={dispatch} />
       <button className="span-two">=</button>
     </div>
   )
