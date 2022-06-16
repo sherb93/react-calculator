@@ -3,7 +3,7 @@ import DigitButton from './components/DigitButton'
 import OperationButton from './components/OperationButton'
 import './styles.css';
 
-// Create variables for values to prevent spelling errors. Variables typos will be caught by VSCode
+// Create properties for type values to prevent spelling errors. Property typos will be caught by VSCode
 export const ACTIONS = {
   APPEND_DIGIT: "append-digit",
   DELETE_DIGIT: "delete-digit",
@@ -25,30 +25,64 @@ function reducer(state, { type, payload }) {
         currentOperand: `${state.currentOperand || ""}${payload.digit}`
       }
     case ACTIONS.CHOOSE_OPERATION:
-      if (state.currentOperand === null && state.previousOperand === null) return state
+      console.log(state);
+      if (state.currentOperand == null && state.previousOperand == null) {
+        return state
+      }
+      if (state.previousOperand == null) {
+        return {
+          ...state,
+          operation: payload.operation,
+          previousOperand: state.currentOperand,
+          currentOperand: null
+        }
+      }
+
+      return {
+        ...state,
+        currentOperand: null,
+        previousOperand: evaluate(state),
+        operation: payload.operation
+      }
     case ACTIONS.CLEAR:
       return {};
-    // case ACTIONS.CHOOSE_OPERATION:
-    //   switch (payload) {
-    //     case "/":
-    //       return {
-    //         ...state,
-    //         currentOperand: 
-    //       }
-    //   }
-    //   return {
-    //     ...state,
-    //     currentOperand: `${state.currentOperand || ""}${payload.digit}`
-    //   }
     default:
       return state;
   }
+}
+
+function evaluate({ currentOperand, previousOperand, operation}) {
+  // Values must be converted from strings to numbers for calculations
+  const previous = parseFloat(previousOperand);
+  const current = parseFloat(currentOperand);
+  if (isNaN(previous) || isNaN(current)) return "";
+  let computation =  "";
+
+  switch (operation) {
+    case "+":
+      computation = previous + current;
+      break;
+    case "-":
+      computation = previous - current;
+      break;
+    case "*":
+      computation = previous * current;
+      break;
+    case "/":
+      computation = previous / current;
+      break;
+    default:
+      throw new Error();
+  }
+
+  return computation.toString();
 }
 
 function App() {
 
   // useReducer() replaces useState() to juggle multiple states at once
   // Parameters: 1. reducer is my custom function scoped globally 2. default state values
+  // Helps separate state management from the rendering logic of the components
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(reducer, {})
 
   return (

@@ -5,7 +5,7 @@ export default function DigitButton({ dispatch, digit }) {
         <button 
             onClick={ () => dispatch({ type: ACTIONS.APPEND_DIGIT , payload: { digit } }) }
         >
-            { digit }
+            {digit}
         </button>
     )
 }
