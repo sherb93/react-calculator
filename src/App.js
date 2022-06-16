@@ -7,8 +7,8 @@ import './styles.css';
 export const ACTIONS = {
   APPEND_DIGIT: "append-digit",
   DELETE_DIGIT: "delete-digit",
-  CLEAR: "clear",
   CHOOSE_OPERATION: "choose-operation",
+  CLEAR: "clear",
   EVALUATE: "evalutate"
 }
 
@@ -17,6 +17,13 @@ function reducer(state, { type, payload }) {
   switch (type) {
     case ACTIONS.APPEND_DIGIT:
       // Edge cases for 0's and .'s
+      if (state.overwrite) {
+        return {
+          ...state,
+          currentOperand: payload.digit,
+          overwrite: false
+        }
+      }
       if (payload.digit === "0" && state.currentOperand === "0") return state
       if (payload.digit !== "0" && state.currentOperand === "0") return {...state, currentOperand: payload.digit}
       if (payload.digit === "." && state.currentOperand.includes(".")) return state
@@ -24,11 +31,39 @@ function reducer(state, { type, payload }) {
         ...state,
         currentOperand: `${state.currentOperand || ""}${payload.digit}`
       }
+    case ACTIONS.DELETE_DIGIT:
+      if (state.overwrite) {
+        return {
+          ...state,
+          currentOperand: null,
+          overwrite: false
+        }
+      }
+
+      if (state.currentOperand == null) return state;
+      if (state.currentOperand.length === 1) {
+        return {
+          ...state,
+          currentOperand: null
+        }
+      }
+
+      return {
+        ...state,
+        currentOperand: state.currentOperand.slice(0, -1)
+      }
     case ACTIONS.CHOOSE_OPERATION:
-      console.log(state);
       if (state.currentOperand == null && state.previousOperand == null) {
         return state
       }
+
+      if (state.currentOperand == null) {
+        return {
+          ...state,
+          operation: payload.operation
+        }
+      }
+
       if (state.previousOperand == null) {
         return {
           ...state,
@@ -46,6 +81,18 @@ function reducer(state, { type, payload }) {
       }
     case ACTIONS.CLEAR:
       return {};
+    case ACTIONS.EVALUATE:
+      if (state.operation && state.currentOperand && state.previousOperand) {
+        return {
+          ...state,
+          currentOperand: evaluate(state),
+          previousOperand: null,
+          operation: null,
+          overwrite: true
+        };
+      } else {
+        return state
+      }
     default:
       return state;
   }
@@ -97,18 +144,18 @@ function App() {
       <DigitButton digit="1" dispatch={dispatch} />
       <DigitButton digit="2" dispatch={dispatch} />
       <DigitButton digit="3" dispatch={dispatch} />
-      <button>*</button>
+      <OperationButton operation="*" dispatch={dispatch} />
       <DigitButton digit="4" dispatch={dispatch} />
       <DigitButton digit="5" dispatch={dispatch} />
       <DigitButton digit="6" dispatch={dispatch} />
-      <button>+</button>
+      <OperationButton operation="+" dispatch={dispatch} />
       <DigitButton digit="7" dispatch={dispatch} />
       <DigitButton digit="8" dispatch={dispatch} />
       <DigitButton digit="9" dispatch={dispatch} />
-      <button>-</button>
+      <OperationButton operation="-" dispatch={dispatch} />
       <DigitButton digit="." dispatch={dispatch} />
       <DigitButton digit="0" dispatch={dispatch} />
-      <button className="span-two">=</button>
+      <button className="span-two" onClick={() => dispatch({ type: ACTIONS.EVALUATE })}>=</button>
     </div>
   )
 }
